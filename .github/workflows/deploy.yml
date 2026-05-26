@@ -1,0 +1,44 @@
+name: Deploy to ACR and Azure Web App
+
+on:
+  push:
+    branches: [ "main" ]
+
+# 🛑 [주의] 본인이 Azure에서 만들 리소스 이름으로 전부 수정해야 합니다!
+env:
+  ACR_LOGIN_SERVER: 'deployazure.azurecr.io' # 예: st707acr.azurecr.io
+  ACR_USERNAME: 'deployazure'               # 예: st707acr
+  IMAGE_NAME: 'flask-app'                     # 이건 그대로 두셔도 됩니다.
+  WEBAPP_NAME: 'deploy-azure'                 # 예: st707-webapp-v2
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    # 1. Azure ACR 로그인 (Admin User 백도어 키 사용)
+    - name: Log in to Azure Container Registry (ACR)
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.ACR_LOGIN_SERVER }}
+        username: ${{ env.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }} # 깃허브 시크릿에 등록할 ACR 비밀번호
+
+    # 2. Docker 빌드 및 ACR로 밀어넣기 (Push)
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+
+    # 3. Azure App Service에 배포 (게시 프로필 사용)
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: '${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest'
