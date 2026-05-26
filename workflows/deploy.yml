@@ -6,10 +6,10 @@ on:
 
 # 🛑 [주의] 본인이 Azure에서 만들 리소스 이름으로 전부 수정해야 합니다!
 env:
-  ACR_LOGIN_SERVER: '본인의ACR이름.azurecr.io' # 예: st707acr.azurecr.io
-  ACR_USERNAME: '본인의ACR이름'               # 예: st707acr
+  ACR_LOGIN_SERVER: 'deployazure.azurecr.io' # 예: st707acr.azurecr.io
+  ACR_USERNAME: 'deployazure'               # 예: st707acr
   IMAGE_NAME: 'flask-app'                     # 이건 그대로 두셔도 됩니다.
-  WEBAPP_NAME: '본인의웹앱이름'                 # 예: st707-webapp-v2
+  WEBAPP_NAME: 'deploy-azure'                 # 예: st707-webapp-v2
 
 jobs:
   build-and-deploy:
